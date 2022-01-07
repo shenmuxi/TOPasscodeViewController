@@ -96,7 +96,7 @@ const CGFloat kTOPasscodeKeypadMaxHeight = 330.0f;
 
     __weak typeof(self) weakSelf = self;
 
-    self.title = NSLocalizedString(@"Enter Passcode", @"");
+    self.title = NSLocalizedString(@"请输入密码", @"");
 
     // Create container view
     self.containerView = [[UIView alloc] initWithFrame:CGRectZero];
@@ -136,7 +136,7 @@ const CGFloat kTOPasscodeKeypadMaxHeight = 330.0f;
 
     // Create error label view
     self.errorLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    self.errorLabel.text = NSLocalizedString(@"Passcodes didn't match. Try again.", @"");
+    self.errorLabel.text = NSLocalizedString(@"密码错误，请重试", @"");
     self.errorLabel.textAlignment = NSTextAlignmentCenter;
     self.errorLabel.font = [UIFont systemFontOfSize:15.0f];
     self.errorLabel.numberOfLines = 0;
@@ -146,9 +146,10 @@ const CGFloat kTOPasscodeKeypadMaxHeight = 330.0f;
 
     // Create Options button
     self.optionsButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [self.optionsButton setTitle:NSLocalizedString(@"Passcode Options", @"") forState:UIControlStateNormal];
+    [self.optionsButton setTitle:NSLocalizedString(@"取消", @"取消") forState:UIControlStateNormal];
     self.optionsButton.titleLabel.font = [UIFont systemFontOfSize:15.0f];
     [self.optionsButton sizeToFit];
+    self.optionsButton.hidden = NO;
     [self.optionsButton addTarget:self action:@selector(optionsCodeButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.optionsButton];
 
@@ -173,7 +174,7 @@ const CGFloat kTOPasscodeKeypadMaxHeight = 330.0f;
     self.verticalMidPoint *= 0.5f;
 
     // Bar button items
-    self.nextBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Next", @"") style:UIBarButtonItemStylePlain target:self action:@selector(nextButtonTapped:)];
+    self.nextBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"下一步", @"") style:UIBarButtonItemStylePlain target:self action:@selector(nextButtonTapped:)];
     self.doneBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneButtonTapped:)];
 
     // Apply light/dark mode
@@ -195,7 +196,7 @@ const CGFloat kTOPasscodeKeypadMaxHeight = 330.0f;
     BOOL variableSizePasscode = (type >= TOPasscodeTypeCustomNumeric);
 
     // Update the visibility of the options button
-    self.optionsButton.hidden = !(state == TOPasscodeSettingsViewStateEnterNewPasscode);
+    //self.optionsButton.hidden = !(state == TOPasscodeSettingsViewStateEnterNewPasscode);
 
     // Clear the input view
     self.inputField.passcode = nil;
@@ -218,7 +219,7 @@ const CGFloat kTOPasscodeKeypadMaxHeight = 330.0f;
     // Update text depending on state
     switch (state) {
         case TOPasscodeSettingsViewStateEnterCurrentPasscode:
-            self.titleLabel.text = NSLocalizedString(@"Enter your passcode", @"");
+            self.titleLabel.text = NSLocalizedString(@"请输入密码", @"");
             self.navigationItem.rightBarButtonItem = variableSizePasscode ? self.nextBarButtonItem : nil;
             if (@available(iOS 9.0, *)) {
                 self.inputField.returnKeyType = UIReturnKeyContinue;
@@ -228,7 +229,7 @@ const CGFloat kTOPasscodeKeypadMaxHeight = 330.0f;
             }
             break;
         case TOPasscodeSettingsViewStateEnterNewPasscode:
-            self.titleLabel.text = NSLocalizedString(@"Enter a new passcode", @"");
+            self.titleLabel.text = NSLocalizedString(@"请输入新密码", @"");
             self.navigationItem.rightBarButtonItem = variableSizePasscode ? self.nextBarButtonItem : nil;
             if (@available(iOS 9.0, *)) {
                 self.inputField.returnKeyType = UIReturnKeyContinue;
@@ -238,7 +239,7 @@ const CGFloat kTOPasscodeKeypadMaxHeight = 330.0f;
             }
             break;
         case TOPasscodeSettingsViewStateConfirmNewPasscode:
-            self.titleLabel.text = NSLocalizedString(@"Confirm new passcode", @"");
+            self.titleLabel.text = NSLocalizedString(@"确认新密码", @"");
             self.navigationItem.rightBarButtonItem = variableSizePasscode ? self.doneBarButtonItem : nil;
             self.inputField.returnKeyType = UIReturnKeyDone;
             break;
@@ -531,42 +532,44 @@ const CGFloat kTOPasscodeKeypadMaxHeight = 330.0f;
 
 - (void)optionsCodeButtonTapped:(id)sender
 {
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-    UIAlertActionStyle style = UIAlertActionStyleDefault;
-
-    __weak typeof(self) weakSelf = self;
-
-    NSArray *types = @[@(TOPasscodeTypeFourDigits),
-                       @(TOPasscodeTypeSixDigits),
-                       @(TOPasscodeTypeCustomNumeric),
-                       @(TOPasscodeTypeCustomAlphanumeric)
-                      ];
-
-
-    NSArray *titles = @[NSLocalizedString(@"4-Digit Numeric Code", @""),
-                        NSLocalizedString(@"6-Digit Numeric Code", @""),
-                        NSLocalizedString(@"Custom Numeric Code", @""),
-                        NSLocalizedString(@"Custom Alphanumeric Code", @"")];
-
-    // Add all the buttons
-    for (NSInteger i = 0; i < types.count; i++) {
-        TOPasscodeType type = [types[i] integerValue];
-        if (type == self.passcodeType) { continue; }
-
-        id handler = ^(UIAlertAction *action) {
-            [weakSelf setPasscodeType:type];
-        };
-        [alertController addAction:[UIAlertAction actionWithTitle:titles[i] style:style handler:handler]];
-    }
-
-    // Cancel button 
-    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:nil]];
-
-    alertController.modalPresentationStyle = UIModalPresentationPopover;
-    alertController.popoverPresentationController.sourceView = self.optionsButton;
-    alertController.popoverPresentationController.sourceRect = self.optionsButton.bounds;
-    alertController.popoverPresentationController.permittedArrowDirections = UIPopoverArrowDirectionDown | UIPopoverArrowDirectionUp;
-    [self presentViewController:alertController animated:YES completion:nil];
+//    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+//    UIAlertActionStyle style = UIAlertActionStyleDefault;
+//
+//    __weak typeof(self) weakSelf = self;
+//
+//    NSArray *types = @[@(TOPasscodeTypeFourDigits),
+//                       @(TOPasscodeTypeSixDigits),
+//                       @(TOPasscodeTypeCustomNumeric),
+//                       @(TOPasscodeTypeCustomAlphanumeric)
+//                      ];
+//
+//
+//    NSArray *titles = @[NSLocalizedString(@"4-Digit Numeric Code", @""),
+//                        NSLocalizedString(@"6-Digit Numeric Code", @""),
+//                        NSLocalizedString(@"Custom Numeric Code", @""),
+//                        NSLocalizedString(@"Custom Alphanumeric Code", @"")];
+//
+//    // Add all the buttons
+//    for (NSInteger i = 0; i < types.count; i++) {
+//        TOPasscodeType type = [types[i] integerValue];
+//        if (type == self.passcodeType) { continue; }
+//
+//        id handler = ^(UIAlertAction *action) {
+//            [weakSelf setPasscodeType:type];
+//        };
+//        [alertController addAction:[UIAlertAction actionWithTitle:titles[i] style:style handler:handler]];
+//    }
+//
+//    // Cancel button
+//    [alertController addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"取消", @"") style:UIAlertActionStyleCancel handler:nil]];
+//
+//    alertController.modalPresentationStyle = UIModalPresentationPopover;
+//    alertController.popoverPresentationController.sourceView = self.optionsButton;
+//    alertController.popoverPresentationController.sourceRect = self.optionsButton.bounds;
+//    alertController.popoverPresentationController.permittedArrowDirections = UIPopoverArrowDirectionDown | UIPopoverArrowDirectionUp;
+//    [self presentViewController:alertController animated:YES completion:nil];
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)nextButtonTapped:(id)sender

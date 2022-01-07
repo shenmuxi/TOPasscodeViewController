@@ -80,7 +80,7 @@
     _currentLayout = _defaultContentLayout;
     _contentLayouts = @[[TOPasscodeViewContentLayout mediumScreenContentLayout],
                         [TOPasscodeViewContentLayout smallScreenContentLayout]];
-    _titleText = NSLocalizedString(@"Enter Passcode", @"");
+    _titleText = NSLocalizedString(@"请输入叽咪密码", @"");
 
     // Start configuring views
     [self setUpViewForType:self.passcodeType];
